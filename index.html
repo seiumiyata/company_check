@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業調査依頼フォーム</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .checkbox-group {
+            margin-bottom: 15px;
+        }
+        .checkbox-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #prompt {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+            color: #333;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+
+<h1>企業調査依頼フォーム</h1>
+<form id="company-research-form">
+    <div class="form-group">
+        <label for="company-name">企業名</label>
+        <input type="text" id="company-name" name="company-name" required>
+    </div>
+    <div class="form-group">
+        <label for="years-of-financials">過去何年の決算情報が欲しいか</label>
+        <input type="number" id="years-of-financials" name="years-of-financials" min="1" required>
+    </div>
+    <div class="checkbox-group">
+        <label>調査項目を選択してください</label>
+        <label><input type="checkbox" name="research-items" value="company-overview"> 会社概要</label>
+        <label><input type="checkbox" name="research-items" value="registration-info"> 登記情報</label>
+        <label><input type="checkbox" name="research-items" value="financial-statements"> 決算書</label>
+        <label><input type="checkbox" name="research-items" value="financial-indicators"> 財務指標</label>
+        <label><input type="checkbox" name="research-items" value="management-quality"> 経営者の資質</label>
+        <label><input type="checkbox" name="research-items" value="corporate-culture"> 企業文化</label>
+        <label><input type="checkbox" name="research-items" value="transaction-history"> 過去の取引実績</label>
+        <label><input type="checkbox" name="research-items" value="major-clients"> 主要取引先</label>
+        <label><input type="checkbox" name="research-items" value="anti-social-check"> 反社チェック</label>
+        <label><input type="checkbox" name="research-items" value="reputation-survey"> 風評調査</label>
+        <label><input type="checkbox" name="research-items" value="technical-skills"> 技術力・技能</label>
+        <label><input type="checkbox" name="research-items" value="compliance"> コンプライアンス</label>
+        <label><input type="checkbox" name="research-items" value="tdb-rating"> 帝国データバンクの評点</label>
+        <label><input type="checkbox" name="research-items" value="tsr-rating"> 東京商工リサーチの評点</label>
+    </div>
+    <button type="button" id="generatePromptButton">プロンプト作成</button>
+    <button type="button" id="clearFormButton">内容をクリア</button>
+</form>
+
+<textarea id="prompt" readonly></textarea>
+<button id="copyPromptButton">プロンプトをコピー</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('generatePromptButton').addEventListener('click', generatePrompt);
+        document.getElementById('clearFormButton').addEventListener('click', clearForm);
+        document.getElementById('copyPromptButton').addEventListener('click', copyToClipboard);
+    });
+
+    function generatePrompt() {
+        const companyName = document.getElementById('company-name').value;
+        const yearsOfFinancials = document.getElementById('years-of-financials').value;
+        const researchItems = Array.from(document.querySelectorAll('input[name="research-items"]:checked')).map(item => item.value);
+
+        const prompt = `
+# 取引先選定のための情報収集プロンプト
+
+以下の項目について、指定された会社「${companyName}」の情報を調べてください。各項目について詳細な情報を提供し、信頼性の高い情報源を引用してください。また、最新の情報をWebで調べて報告してください。
+
+## 基本情報
+${researchItems.includes('company-overview') ? '1. **会社概要**: 設立年、資本金、従業員数、主要取引先などの基本情報を提供してください。\n' : ''}
+${researchItems.includes('registration-info') ? '2. **登記情報**: 商業登記簿謄本や不動産登記簿謄本を取得し、会社の設立年月日、資本金の増減、役員の変更などを確認してください。\n' : ''}
+
+## 財務情報
+${researchItems.includes('financial-statements') ? `3. **決算書**: 直近の${yearsOfFinancials}年の決算書を入手し、収益性、成長性、安全性を評価してください。\n` : ''}
+${researchItems.includes('financial-indicators') ? '4. **財務指標**: 標準財務指標を参考に、収益力や財務の健全性を評価し、格付けを行ってください。\n' : ''}
+
+## 定性情報
+${researchItems.includes('management-quality') ? '5. **経営者の資質**: 経営者や役員の人柄、経営方針、過去の実績などをヒアリングし、信頼性を評価してください。\n' : ''}
+${researchItems.includes('corporate-culture') ? '6. **企業文化**: 企業の社訓や社是、従業員の離職率などを確認し、企業の内部環境を把握してください。\n' : ''}
+
+## 取引実績
+${researchItems.includes('transaction-history') ? '7. **過去の取引実績**: 既存の取引先での実績や評判を確認し、信頼性を評価してください。\n' : ''}
+${researchItems.includes('major-clients') ? '8. **主要取引先**: 主要な取引先や取引金融機関を確認し、取引先の信用度を間接的に評価してください。\n' : ''}
+
+## リスク管理
+${researchItems.includes('anti-social-check') ? '9. **反社チェック**: 反社会的勢力との関係やマネーロンダリングのリスクを確認してください。\n' : ''}
+${researchItems.includes('reputation-survey') ? '10. **風評調査**: インターネットや第三者機関を利用して、取引先の評判や過去のトラブルを調査してください。\n' : ''}
+
+## その他の情報
+${researchItems.includes('technical-skills') ? '11. **技術力・技能**: 必要な技術や技能を持っているか、実地調査やヒアリングで確認してください。\n' : ''}
+${researchItems.includes('compliance') ? '12. **コンプライアンス**: コンプライアンス遵守状況や法令違反の有無を確認してください。\n' : ''}
+
+## 評点
+${researchItems.includes('tdb-rating') ? '13. **帝国データバンクの評点**: 帝国データバンクの評点を確認し、企業の信用度を評価してください。\n' : ''}
+${researchItems.includes('tsr-rating') ? '14. **東京商工リサーチの評点**: 東京商工リサーチの評点を確認し、企業の信用度を評価してください。\n' : ''}
+
+以上の情報を総合的に評価し、取引先の信用度やリスクを判断してください。各項目について、信頼性の高い情報源を引用し、詳細なレポートを作成してください。また、最新の情報をWebで調べて報告してください。今回の調査結果から考える、企業の分析結果も記載するようにしてください。
+        `;
+
+        document.getElementById('prompt').value = prompt;
+        localStorage.setItem('savedPrompt', prompt);
+    }
+
+    function copyToClipboard() {
+        const promptText = document.getElementById('prompt').value;
+        navigator.clipboard.writeText(promptText).then(() => {
+            alert('プロンプトがクリップボードにコピーされました。');
+        }, () => {
+            alert('コピーに失敗しました。');
+        });
+    }
+
+    function clearForm() {
+        document.getElementById('company-research-form').reset();
+        document.getElementById('prompt').value = '';
+        localStorage.removeItem('savedPrompt');
+    }
+
+    window.onload = function() {
+        const savedPrompt = localStorage.getItem('savedPrompt');
+        if (savedPrompt) {
+            document.getElementById('prompt').value = savedPrompt;
+        }
+    }
+</script>
+
+</body>
+</html>
